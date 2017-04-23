@@ -161,3 +161,11 @@ Proof. simpl. reflexivity. Qed.
 Example test_blt_nat3: (blt_nat 4 2) = false.
 Proof. simpl. reflexivity. Qed.
 
+
+Theorem plus_0_: forall n :nat, 0 + n = n.
+Proof. intros n. simpl. reflexivity. Qed.
+
+Theorem plus_id: forall m n:nat,
+ n=m ->
+ n+n = m+m.
+Proof. intros n m. intros H. rewrite -> H. reflexivity. Qed.
