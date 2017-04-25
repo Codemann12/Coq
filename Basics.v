@@ -57,17 +57,23 @@ Proof. simpl. reflexivity. Qed.
 
 (* Exercise: 1 star (andb3) *)
 
-Definition andb2 (b1:bool) (b2:bool):bool :=
+Definition andb (b1:bool) (b2:bool):bool :=
      match b1 with
        | true  => b2
        | false => false
        
        end.
 
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true  => true
+  | false => b2
+  end.
+
 Definition andb3 (b1:bool) (b2:bool) (b3:bool) : bool:=
      match b1 with
        | false => false
-       | true => (andb2 b2 b3)
+       | true => (andb b2 b3)
        end.
  
 Example test_andb31: (andb3 true true true) = true.
@@ -97,6 +103,13 @@ Definition pred (n : nat) : nat :=
 
 Check (S(S(O))).
 
+Fixpoint plus (n m:nat):nat:=
+   match n with
+    | O => m 
+    | S n' => S(plus n' m)
+   end.
+
+Compute (plus 5 4).
 
 (* Exercise: 1 star (factorial)*)
 
@@ -151,7 +164,7 @@ Compute (leq1 (S(S(S(S(O))))) (S(S(S(S(O)))))).
 
 
 Definition blt_nat (n m : nat) : bool :=
-     andb2 (leq1 n m) (negb (leq0 n m)).
+     andb (leq1 n m) (negb (leq0 n m)).
                   
 
 Example test_blt_nat1: (blt_nat 2 2) = false.
@@ -162,10 +175,158 @@ Example test_blt_nat3: (blt_nat 4 2) = false.
 Proof. simpl. reflexivity. Qed.
 
 
-Theorem plus_0_: forall n :nat, 0 + n = n.
-Proof. intros n. simpl. reflexivity. Qed.
+Theorem plus_0_n: forall n :nat, 0 + n = n.
+Proof. 
+  intros n.
+  simpl.
+  reflexivity.
+  Qed.
 
 Theorem plus_id: forall m n:nat,
  n=m ->
  n+n = m+m.
-Proof. intros n m. intros H. rewrite -> H. reflexivity. Qed.
+Proof.
+ intros n m. 
+ intros H.
+ rewrite -> H. 
+ reflexivity.
+ Qed.
+
+(*Exercise: 1 star (plus id exercise) *)
+Theorem plus_id_exercise : forall n m o : nat,
+  n = m -> m = o -> n + m = m + o.
+Proof.
+  intros n m o .
+  intros H.
+  intros G.
+  rewrite -> H.
+  rewrite -> G.
+  reflexivity.
+  Qed.
+
+
+Theorem plus_1_l : forall n:nat, 1 + n = S n.
+Proof.
+  intros n. reflexivity. Qed.
+
+Theorem mult_0_l : forall n:nat, 0 * n = 0.
+Proof.
+  intros n. reflexivity. Qed.
+
+
+Theorem mult_0_plus : forall n m : nat,
+  (0 + n) * m = n * m.
+Proof.
+  intros n m.
+  rewrite -> plus_0_n.
+  reflexivity. Qed.
+
+(* exercise: 2 stars (mult S 1) *)
+
+
+Theorem mult_S_1 : forall n m : nat,
+  m = S n ->
+  m * (1 + n) = m * m.
+Proof.
+   intros  n m .
+   intros H. 
+   rewrite -> H.
+   reflexivity. Qed.
+
+
+
+(*Exercise: 1 star (zero_nbeq_plus_1)*)
+Fixpoint beq_nat (n m : nat) : bool :=
+  match n with
+  | O => match m with
+         | O => true
+         | S m' => false
+         end
+  | S n' => match m with
+            | O => false
+            | S m' => beq_nat n' m'
+            end
+  end.
+
+Theorem zero_nbeq_plus_1 : forall n : nat,
+  beq_nat 0 (n + 1) = false.
+Proof.
+  intros n. destruct n as [|n'].
+     reflexivity.
+     reflexivity. Qed.
+
+(* 
+Exercise: 2 stars (andb_eq_orb)*)
+
+
+
+Theorem andb_eq_orb : forall (b c : bool),
+  (andb b c = orb b c) ->  b = c.
+Proof.
+  intros b c. destruct b.
+   simpl. 
+   intros H.
+   rewrite -> H.
+   reflexivity.
+   simpl.
+   intros G.
+   rewrite -> G. reflexivity. Qed.
+
+
+   
+   
+
+
+(* Exercise: 2 stars (andb_true_elim2) *)
+
+Theorem andb_true_elim2 : forall b c :bool,
+  andb b c = true -> 
+  c = true.
+Proof. intros b c . destruct b. simpl.
+       intros H.
+       rewrite -> H.
+       reflexivity.   
+       simpl.
+       intros G.
+       rewrite <- G.
+       destruct c.
+       rewrite -> G.
+       reflexivity.
+       reflexivity. Qed.
+        (* a little bit long, but that's my best solution for now *)
+
+
+Theorem andb3_exchange :
+  forall b c d, andb (andb b c) d = andb (andb b d) c.
+Proof.
+  intros b c d. destruct b.
+  - destruct c.
+    { destruct d.
+      - reflexivity.
+      - reflexivity. }
+    { destruct d.
+      - reflexivity.
+      - reflexivity. }
+  - destruct c.
+    { destruct d.
+      - reflexivity.
+      - reflexivity. }
+    { destruct d.
+      - reflexivity.
+      - reflexivity. }
+Qed.
+
+
+
+(* Exercise: 2 starsM (boolean_functions)*)
+
+Theorem identity_fn_applied_twice :
+  forall (f : bool -> bool),
+  (forall (x : bool), f x = x) ->
+  forall (b : bool), f (f b) = b.
+Proof.
+   intros f H b. rewrite -> H. rewrite -> H. reflexivity. Qed.
+   
+
+
+
